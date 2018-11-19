@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <header>{{ obj.title }}</header>
+    <small>{{ obj.created_at }}</small>
+    <small>{{ obj.user.username }}</small>
+    <article>
+        <p>{{ obj.content }}</p>
+    </article>
+{% endblock %}
