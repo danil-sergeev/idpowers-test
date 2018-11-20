@@ -24,7 +24,7 @@
 {% endblock %}
 
 {% block script %}
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.js"></script>
     <script>
 
         const {host, pathname} = window.location;
@@ -32,12 +32,13 @@
         const messageInput = $("#id_message");
         const chatList = $("#messages");
         const endpoint = `ws://${host}${pathname}`;
-        const socket = new WebSocket(endpoint);
+        const socket = new ReconnectingWebSocket(endpoint);
 
         socket.onmessage = (e) => {
-            console.log(e)
+            console.log(e);
             const chatData = JSON.parse(e.data);
-            chatList.append("<li>" + message + '</li>')
+            const {message, email} = chatData;
+            chatList.append(`<li>${message} from ${email}</li>`)
         };
         socket.onopen = (e) => {
             console.log(e);
@@ -49,8 +50,8 @@
                 };
 
                 socket.send(JSON.stringify(jsonData));
+                formData[0].reset()
             })
-                .then(formData[0].reset())
         };
         socket.onerror = (e) => {
             console.log(e)

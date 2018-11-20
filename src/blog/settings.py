@@ -118,10 +118,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# AUTHENTICATION_BACKENDS = ['users.authentication.EmailBackend']
 AUTH_USER_MODEL = 'users.Profile'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 

@@ -1,12 +1,28 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Все публикации пользователей</h1>
+    <h1>{{ title }}</h1>
+    {% if title == 'Мои публикации' %}
+        <h4>
+            <a href="{% url 'posts:add-post' %}">
+                Добавить
+            </a>
+        </h4>
+    {% endif %}
     {% for obj in object_list %}
         <div style="display: flex; flex-flow: column wrap; justify-content: space-between; align-items: left">
-            <h3>{{ obj.title }}</h3>
-            {% if request.user.username != obj.author.username %}
-                <h4>{{ obj.author.username }}</h4>
+            <h3>
+                <a href="{% url 'posts:detail-post' pk=obj.pk %}">
+                    {{ obj.title }}
+                </a>
+            </h3>
+            {% if request.user.email != obj.author.email %}
+                <h4>
+                    <small>by</small>
+                    <a href="{% url 'users:detail' pk=obj.author.pk %}">
+                        {{ obj.author.email }}
+                    </a>
+                </h4>
             {% endif %}
             <small>{{ obj.created_at }}</small>
             <p>{{ obj.summary }}</p>

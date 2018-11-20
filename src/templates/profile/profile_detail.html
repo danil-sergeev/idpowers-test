@@ -1,16 +1,33 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <header>{{ obj.get_full_name|default: obj.email }}</header>
-    <img src="{{ obj.avatar.url }}">
-    <h2>Contacts</h2>
-    <ul>
-        {% if obj.skype %}
-            <li>Skype: {{ obj.skype }}</li>
-        {% elif obj.telephone %}
-            <li>Tel: {{ obj.telephone }}</li>
+    {% if obj.first_name and obj.last_name %}
+        <h1>{{ obj.first_name }} {{ obj.last_name }}</h1>
+    {% endif %}
+    <h1>{{ obj.email }}</h1>
+    {% if obj.avatar %}
+        <img src="{{ obj.avatar.url }}">
+    {% endif %}
+    {% if obj.skype %}
+        <h2>Skype: {{ obj.skype }}</h2>
+    {% elif obj.telephone %}
+        <h2>Tel: {{ obj.telephone }}</h2>
+    {% endif %}
+    <h2>Email: {{ obj.email }}</h2>
+    <h2>
+        {% if obj == request.user %}
+            <a href="{% url 'posts:my-posts' %}">
+                Мои публикации
+            </a>
+        {% else %}
+            <a href="{% url 'posts:posts-by-pk' pk=obj.pk %}">
+                Все публикации пользователя
+            </a>
         {% endif %}
-        <li>Email: {{ obj.email }}</li>
-        <li></li>
-    </ul>
+    </h2>
+    {% if obj == request.user %}
+        <h2>
+            <a href="{% url 'users:edit' pk=obj.pk %}">Редактировать профиль</a>
+        </h2>
+    {% endif %}
 {% endblock %}

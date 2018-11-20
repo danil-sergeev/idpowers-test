@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="" method="post">{% csrf_token %}
+    <h3>Вы уверены что хотите удалить <strong>"{{ object.title }}"</strong> ?</h3>
+    <input type="submit" value="Да" />
+</form>
+{% endblock %}
