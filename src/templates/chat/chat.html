@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h3> Chat with
+        {% if request.user == object.customer %}
+            {{ object.admin }}
+        {% else %}
+            {{ object.customer }}
+        {% endif %}
+    </h3>
+    <ul id='messages'>
+        {% for chat in object.messages.all %}
+
+            <li>{{ chat.message }} from {{ chat.sender.email }}</li>
+
+        {% endfor %}
+    </ul>
+
+    <form id='form' method='POST'> {% csrf_token %}
+        {{ form.as_p }}
+        <input type='submit' class='btn btn-primary'/>
+    </form>
+
+{% endblock %}
+
+{% block script %}
+
+    <script>
+
+        const {host, pathname} = window.location;
+        const formData = $("#form");
+        const messageInput = $("#id_message");
+        const chatList = $("#messages");
+        const endpoint = `ws://${host}${pathname}`;
+        const socket = new WebSocket(endpoint);
+
+        socket.onmessage = (e) => {
+            console.log(e)
+            const chatData = JSON.parse(e.data);
+            chatList.append("<li>" + message + '</li>')
+        };
+        socket.onopen = (e) => {
+            console.log(e);
+            formData.submit((e) => {
+                event.preventDefault();
+                const text = messageInput.val();
+                const jsonData = {
+                    'message': text
+                };
+
+                socket.send(JSON.stringify(jsonData));
+            })
+                .then(formData[0].reset())
+        };
+        socket.onerror = (e) => {
+            console.log(e)
+        };
+        socket.onclose = (e) => {
+            console.log(e)
+        };
+
+    </script>
+
+{% endblock %}

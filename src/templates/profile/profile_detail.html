@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <header>{{ obj.get_full_name|default: obj.email }}</header>
+    <img src="{{ obj.avatar.url }}">
+    <h2>Contacts</h2>
+    <ul>
+        {% if obj.skype %}
+            <li>Skype: {{ obj.skype }}</li>
+        {% elif obj.telephone %}
+            <li>Tel: {{ obj.telephone }}</li>
+        {% endif %}
+        <li>Email: {{ obj.email }}</li>
+        <li></li>
+    </ul>
+{% endblock %}

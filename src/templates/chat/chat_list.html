@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+        <header>Мои запросы администратору</header>
+        <a href="{% url 'tickets:create-ticket' %}">Написать запрос</a>
+    </div>
+    {% for obj in object_list %}
+        <div style="display: flex; flex-direction: row; justify-content: space-around; align-items: center">
+
+            <h3>
+                <a href="{% url 'tickets:ticket' pk=obj.pk %} ">Ticket №{{ obj.pk }}</a>
+            </h3>
+            <h3>{{ obj.created_at }}</h3>
+            <h3>To {{ obj.admin.email }}</h3>
+        </div>
+    {% endfor %}
+{% endblock content %}
