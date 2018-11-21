@@ -18,6 +18,15 @@
             </a>
         </h3>
     {% endif %}
+
+    {% if request.user != obj.author %}
+        <form method="post" action="{% url 'posts:mark' %}">
+            {% csrf_token %}
+            {{ mark_form.as_p }}
+            <input type="submit" name="form2" class="btn btn-primary">
+        </form>
+    {% endif %}
+
     <h2>Комментарии</h2>
     <ul>
         {% for comment in obj.comments.all %}
@@ -28,7 +37,7 @@
         <form id="comment_form" method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <input type="submit" class="btn btn-primary">
+            <input type="submit" name="form1" class="btn btn-primary">
         </form>
     {% elif request.user == obj.author %}
         <div>

@@ -96,6 +96,7 @@ class PostsByCategory(generic.ListView):
 class PostDetailView(FormMixin, generic.DetailView):
     template_name = 'post_detail.html'
     form_class = CommentForm
+    second_form_class = MarkForm
 
     def get_queryset(self):
         queryset = Post.objects.prefetch_related(
@@ -108,13 +109,20 @@ class PostDetailView(FormMixin, generic.DetailView):
         context['obj'] = self.get_object(self.get_queryset())
         if self.request.user.is_authenticated:
             context['form'] = self.get_form()
+            context['mark_form'] = self.mark_form
         return context
 
     def post(self, request, *args, **kwargs):
         posting = self.get_object()
+
         if request.user == posting.author:
             return HttpResponseForbidden()
-        form = self.get_form()
+
+        if 'form1' in request.POST:
+            form = self.get_form()
+        else:
+            form = self.get_form(self.second_form_class)
+
         if form.is_valid():
             return self.form_valid(form)
         else:
@@ -123,8 +131,12 @@ class PostDetailView(FormMixin, generic.DetailView):
     def form_valid(self, form):
         posting = self.get_object()
         sender = self.request.user
-        content = form.cleaned_data.get("content")
-        Comment.objects.create(post=posting, sender=sender, content=content)
+        if form == self.form_class:
+            content = form.cleaned_data.get("content")
+            Comment.objects.create(post=posting, sender=sender, content=content)
+        else:
+            selected_mark = form.cleaned_data.get("select")
+            Mark.objects.create(post=posting, sender=sender, mark=selected_mark)
         return super(PostDetailView, self).form_valid(form)
 
     def get_success_url(self):
@@ -172,6 +184,7 @@ class LeftMarkView(LoginRequiredMixin, View):
             mark.save()
         else:
             form = MarkForm()
+        return reverse_lazy('posts:detail-post', args={post_pk})
 
 
 class CategoryListView(generic.ListView):
