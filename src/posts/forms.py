@@ -1,6 +1,6 @@
 from django import forms
 
-from posts.models import Post, Comment, Mark
+from posts.models import Post, Comment
 
 
 class PostForm(forms.ModelForm):

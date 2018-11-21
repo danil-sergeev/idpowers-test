@@ -1,4 +1,4 @@
-from django.http import Http404, HttpResponseForbidden
+from django.http import HttpResponseForbidden
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.views.generic.edit import FormMixin
@@ -11,17 +11,14 @@ from tickets.forms import ChatForm, ChatCreateForm
 
 # Create your views here.
 
-class AdminInboxListView(LoginRequiredMixin, ListView):
-    pass
-
 
 class MyTicketsListView(LoginRequiredMixin, ListView):
     template_name = 'chat/chat_list.html'
 
     def get_queryset(self):
         return Chat.objects.filter(
-            customer=self.request.user
-        ).select_related('admin')
+            Q(customer=self.request.user) | Q(admin=self.request.suer)
+        )
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(MyTicketsListView, self).get_context_data(**kwargs)

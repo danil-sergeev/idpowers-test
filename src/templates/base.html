@@ -20,6 +20,13 @@
 <h1 style="display: flex; justify-content: center;">Blog</h1>
 {% if request.user.is_authenticated %}
     <div style="display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: flex-end; align-content: flex-end; ">
+          {% if not request.user.is_superuser %}
+              <h4>
+                  <a href="{% url 'tickets:my-tickets' %}">
+                      Техподдержка
+                  </a>
+              </h4>
+           {% endif %}
         &nbsp; <h4><a href="{% url 'users:logout' %}">Выйти &nbsp; </a></h4>
     </div>
 {% else %}

@@ -172,21 +172,6 @@ class PostDeleteView(LoginRequiredMixin, generic.DeleteView):
     success_url = reverse_lazy('posts:my-posts')
 
 
-class LeftMarkView(LoginRequiredMixin, View):
-    def post(self, request, *args, **kwargs):
-        post_pk = self.kwargs.get('post_pk')
-        post_obj = Post.objects.get(pk=post_pk)
-        form = MarkForm(request.POST)
-        if form.is_valid():
-            mark = Mark()
-            mark.post = post_obj
-            mark.sender = request.user
-            mark.save()
-        else:
-            form = MarkForm()
-        return reverse_lazy('posts:detail-post', args={post_pk})
-
-
 class CategoryListView(generic.ListView):
     template_name = 'main.html'
 
