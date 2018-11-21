@@ -9,8 +9,29 @@
             </a>
         </h4>
     {% endif %}
+    <form action="{% url 'posts:posts' %}" method="get" accept-charset="utf-8">
+        <input name="q" type="text" placeholder="Поиск">
+        <button type="submit">
+            <i>Поиск</i>
+        </button>
+    </form>
+
+    <form action="{% url 'posts:posts' %}" method="get" accept-charset="utf-8"
+          style="display: flex; flex-direction: row; align-items: center">
+        <select size="3" multiple name="sort">
+            <option disabled>Выберите сортировку</option>
+            <option selected value="-created_at">В порядке возрастания</option>
+            <option value="created_at">В порядке убывания</option>
+            <option value="author">По автору</option>
+        </select>
+        &nbsp;
+        <button type="submit">
+            <i>Сортировать</i>
+        </button>
+    </form>
+
     {% for obj in object_list %}
-        <div style="display: flex; flex-flow: column wrap; justify-content: space-between; align-items: left">
+        <div style="display: flex; flex-flow: column wrap; justify-content: space-between; align-items: center">
             <h3>
                 <a href="{% url 'posts:detail-post' pk=obj.pk %}">
                     {{ obj.title }}

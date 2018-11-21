@@ -30,13 +30,13 @@
 <div class="menu-bar">
     <h4><a href="/">Главная</a></h4>
     <h4><a href="{% url 'posts:posts' %}">Публикации пользователей</a></h4>
-    {% if request.user.is_superuser %}
-        <h4>
-            <a href="{% url 'tickets:admin' %}">
-                Запросы
-            </a>
-        </h4>
-    {% endif %}
+{#    {% if request.user.is_superuser %}#}
+{#        <h4>#}
+{#            <a href="{% url 'tickets:admin' %}">#}
+{#                Запросы#}
+{#            </a>#}
+{#        </h4>#}
+{#    {% endif %}#}
     {% if request.user.is_authenticated %}
 
         <h4>

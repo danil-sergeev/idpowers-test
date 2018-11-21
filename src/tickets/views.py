@@ -1,5 +1,5 @@
 from django.http import Http404, HttpResponseForbidden
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.views.generic.edit import FormMixin
 from django.views.generic import DetailView, ListView, CreateView, FormView
@@ -10,6 +10,9 @@ from tickets.forms import ChatForm, ChatCreateForm
 
 
 # Create your views here.
+
+class AdminInboxListView(LoginRequiredMixin, ListView):
+    pass
 
 
 class MyTicketsListView(LoginRequiredMixin, ListView):
@@ -42,11 +45,16 @@ class CreateChatWithAdmin(LoginRequiredMixin, CreateView):
         return super(CreateChatWithAdmin, self).form_valid(form)
 
 
-class ChatView(LoginRequiredMixin, FormMixin, DetailView):
+class ChatView(UserPassesTestMixin, LoginRequiredMixin, FormMixin, DetailView):
     template_name = 'chat/chat.html'
     model = Chat
     form_class = ChatForm
     success_url = './'
+
+    def test_func(self):
+        user = self.request.user
+        chat_obj = self.get_object()
+        return user == chat_obj.admin or user == chat_obj.customer
 
     def get_queryset(self):
         queryset = Chat.objects.filter(

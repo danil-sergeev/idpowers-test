@@ -19,9 +19,11 @@ from django.contrib import admin
 from django.views.generic import TemplateView
 from django.urls import path, include
 
+from posts.views import CategoryListView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', TemplateView.as_view(template_name="main.html"), name="main"),
+    path('', CategoryListView.as_view(), name="main"),
     path('about/', TemplateView.as_view(template_name="about.html"), name="about"),
     path('', include('users.urls', 'users')),
     path('posts/', include('posts.urls', 'posts')),

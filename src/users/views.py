@@ -7,7 +7,7 @@ from django.views.generic import CreateView, DetailView, UpdateView
 from django.views import View
 from django.db.models import Prefetch
 
-from users.forms import SignUpForm
+from users.forms import SignUpForm, SignUpForm
 
 
 profile = get_user_model()
@@ -38,9 +38,12 @@ class UpdateProfile(UpdateView):
 
 
 class CreateUser(CreateView):
-    form_class = UserCreationForm
+    form_class = SignUpForm
+    model = profile
     template_name = 'registration/register.html'
-    success_url = '/'
+
+    def get_success_url(self):
+        return reverse_lazy('users:detail', args={self.object.pk})
 
 
 class SignUpView(View):
@@ -58,7 +61,8 @@ class SignUpView(View):
         if form.is_valid():
             print(form.cleaned_data)
             user = profile.objects.create_user(
-                **form.cleaned_data
+                email=form.cleaned_data.get('email'),
+                password=form.cleaned_data.get('password1')
             )
             print(user)
             return HttpResponseRedirect(login_url)

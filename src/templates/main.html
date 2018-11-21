@@ -5,4 +5,14 @@
     <h1>Blog App - приложение коллективный блог</h1>
     <p>С помощью этого приложения вы можете: <strong>создать</strong> свой собственный блог, писать публикации и
         оставлять комментарии и оценки другим пользователям.</p>
+    <h2>Категории</h2>
+    <ul>
+        {% for obj in object_list %}
+            <li>
+                <a href="{% url 'posts:posts-by-category' title=obj.title %}">
+                    {{ obj.title }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
 {% endblock %}

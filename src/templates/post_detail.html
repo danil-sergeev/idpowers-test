@@ -18,4 +18,25 @@
             </a>
         </h3>
     {% endif %}
+    <h2>Комментарии</h2>
+    <ul>
+        {% for comment in obj.comments.all %}
+            <li>{{ comment.content }} via {{ comment.sender.email }} at {{ comment.created_at }}</li>
+        {% endfor %}
+    </ul>
+    {% if form and request.user != obj.author %}
+        <form id="comment_form" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" class="btn btn-primary">
+        </form>
+    {% elif request.user == obj.author %}
+        <div>
+
+        </div>
+    {% else %}
+        <div>
+            Только авторизованные пользователи могут оставлять комментарии.<br/>
+        </div>
+    {% endif %}
 {% endblock %}

@@ -1,32 +1,16 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.db.models import Prefetch
 from django.urls import reverse_lazy
-from django.views import generic
+from django.views import generic, View
+from django.views.generic.edit import FormMixin
+from django.http import HttpResponseForbidden
 
-from posts.models import Post, Category
-from posts.forms import PostForm
+from posts.models import Post, Category, Comment, Mark
+from posts.forms import PostForm, CommentForm, MarkForm
 
 
 # Create your views here.
-
-class PostsByCategory(generic.ListView):
-    template_name = 'posts.html'
-
-    def get_queryset(self):
-        title = self.kwargs['title']
-        queryset = Category.objects.prefetch_related(
-            Prefetch('posts_by_category')
-        ).filter(title__iexact=self.title)
-        return queryset
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        title = self.kwargs['title']
-        context = super(GetPostsByCategory, self).get_context_data(**kwargs)
-        posts_of_category = self.get_queryset().posts_by_category
-        context['object_list'] = posts_of_category
-        context['title'] = f'Публикации в категории {title}'
-        return context
-
 
 class AllPostsListView(generic.ListView):
     template_name = 'posts.html'
@@ -35,6 +19,23 @@ class AllPostsListView(generic.ListView):
         queryset = Post.objects.all().prefetch_related(
             Prefetch('author')
         )
+
+        keywords = self.request.GET.get('q')
+        sort = self.request.GET.get('sort')
+
+        if keywords:
+            print(keywords)
+            query = SearchQuery(keywords)
+            title_vector = SearchVector('title', weight='A')
+            content_vector = SearchVector('content', weight='B')
+            vectors = title_vector + content_vector
+            queryset = queryset.annotate(search=vectors).filter(search=query)
+            queryset = queryset.annotate(rank=SearchRank(vectors, query)).order_by('-rank')
+
+        if sort:
+            print(sort)
+            queryset = queryset.order_by(sort)
+
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -74,19 +75,60 @@ class PostsByPk(generic.ListView):
         return context
 
 
-class PostDetailView(generic.DetailView):
+class PostsByCategory(generic.ListView):
+    template_name = 'posts.html'
+
+    def get_queryset(self):
+        title = self.kwargs['title']
+        queryset = Post.objects.prefetch_related(
+            Prefetch('category')
+        ).filter(category__title__exact=title)
+        return queryset
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        title = self.kwargs['title']
+        context = super(PostsByCategory, self).get_context_data(**kwargs)
+        context['object_list'] = self.get_queryset()
+        context['title'] = f'Публикации в категории {title}'
+        return context
+
+
+class PostDetailView(FormMixin, generic.DetailView):
     template_name = 'post_detail.html'
+    form_class = CommentForm
 
     def get_queryset(self):
         queryset = Post.objects.prefetch_related(
-            Prefetch('author')
+            Prefetch('comments')
         )
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super(PostDetailView, self).get_context_data()
         context['obj'] = self.get_object(self.get_queryset())
+        if self.request.user.is_authenticated:
+            context['form'] = self.get_form()
         return context
+
+    def post(self, request, *args, **kwargs):
+        posting = self.get_object()
+        if request.user == posting.author:
+            return HttpResponseForbidden()
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        posting = self.get_object()
+        sender = self.request.user
+        content = form.cleaned_data.get("content")
+        Comment.objects.create(post=posting, sender=sender, content=content)
+        return super(PostDetailView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("posts:detail-post", args={self.get_object().pk})
 
 
 class PostCreateView(LoginRequiredMixin, generic.CreateView):
@@ -116,3 +158,30 @@ class PostDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Post
     template_name = 'confirm_delete.html'
     success_url = reverse_lazy('posts:my-posts')
+
+
+class LeftMarkView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        post_pk = self.kwargs.get('post_pk')
+        post_obj = Post.objects.get(pk=post_pk)
+        form = MarkForm(request.POST)
+        if form.is_valid():
+            mark = Mark()
+            mark.post = post_obj
+            mark.sender = request.user
+            mark.save()
+        else:
+            form = MarkForm()
+
+
+class CategoryListView(generic.ListView):
+    template_name = 'main.html'
+
+    def get_queryset(self):
+        queryset = Category.objects.all()
+        return queryset
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(CategoryListView, self).get_context_data(**kwargs)
+        context['object_list'] = self.get_queryset()
+        return context
