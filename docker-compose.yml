@@ -1,0 +1,47 @@
+version: '3'
+services:
+
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=blog
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_HOST=blog_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    networks:
+      - default
+
+  redis:
+    image: redis:latest
+    hostname: redis
+
+
+  backend:
+    container_name: 'blog_backend'
+    volumes:
+      - ./src:/opt/app
+    build:
+      dockerfile: Dockerfile
+      context: src/.
+    depends_on:
+      - db
+    links:
+      - db
+      - redis
+    image: blog_backend:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=blog
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_HOST=blog_db
+      - DEBUG=False
+    deploy:
+      replicas: 1
+    networks:
+      - default

@@ -7,9 +7,9 @@
     {% if obj.author != request.user %}
         <small>{{ obj.author.email }}</small>
     {% endif %}
-    <p>
     <p>{{ obj.content }}</p>
-    </p>
+
+    <hr>
     {% if obj.author == request.user %}
         <h3>
             <a href="{% url 'posts:edit' pk=obj.pk %}">
@@ -22,14 +22,19 @@
     {% endif %}
 
     {% if request.user != obj.author %}
-        <form method="post">
-            {% csrf_token %}
-            {{ mark_form.as_p }}
-            <input type="submit" name="form2" class="btn btn-primary">
-        </form>
+        {% if obj.marks.all.count == 0 %}
+            <form method="post">
+                {% csrf_token %}
+                {{ mark_form.as_p }}
+                <input type="submit" class="btn btn-primary" name='form2'>
+            </form>
+        {% else %}
+            <h2>Ваша оценка: <strong>{{ obj.marks.all.first.mark }}</strong></h2>
+            <hr>
+        {% endif %}
     {% endif %}
 
-    <h2>Комментарии</h2>
+    <h4>Комментарии</h4>
     <ul>
         {% for comment in obj.comments.all %}
             <li>{{ comment.content }} via {{ comment.sender.email }} at {{ comment.created_at }}</li>
@@ -39,7 +44,7 @@
         <form id="comment_form" method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <input type="submit" name="form1" class="btn btn-primary">
+            <input type="submit" class="btn btn-primary" name='form1'>
         </form>
     {% elif request.user == obj.author %}
         <div>
@@ -50,4 +55,18 @@
             Только авторизованные пользователи могут оставлять комментарии.<br/>
         </div>
     {% endif %}
+{% endblock %}
+
+{% block script %}
+
+    <script type="text/javascript">
+        $(function () {
+            $(".inline.{{ comment_form.prefix }}").formset({
+                prefix: "{{ comment_form.prefix }}",
+            })
+            $(".inline.{{ mark_form.prefix }}").formset({
+                prefix: "{{ mark_form.prefix }}",
+            })
+        })
+    </script>
 {% endblock %}

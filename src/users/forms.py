@@ -9,7 +9,7 @@ profile = get_user_model()
 
 class SignUpForm(forms.Form):
     email = forms.CharField(required=True)
-    password1 = forms.CharField(widget=forms.PasswordInput, label='Пароль', required=True)
+    password = forms.CharField(widget=forms.PasswordInput, label='Пароль', required=True)
     password2 = forms.CharField(widget=forms.PasswordInput, label='Подтверждение пароля', required=True)
     first_name = forms.CharField(label='Имя')
     last_name = forms.CharField(label='Фамилия')

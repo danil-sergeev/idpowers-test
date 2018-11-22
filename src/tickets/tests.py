@@ -1,9 +1,8 @@
-from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser
+from django.test import TestCase, Client
 from django.urls import reverse_lazy
 
-from tickets.models import Chat, ChatMessage
+from tickets.models import Chat
 
 # Create your tests here.
 
@@ -28,7 +27,7 @@ class ChatTestCase(TestCase):
             admin=self.admin,
             customer=self.customer
         )
-        self.client = Client()
+        self.client = Client(enforce_csrf_checks=True)
 
         self.chat_url = reverse_lazy('tickets:ticket', args={self.chat.pk})
 
@@ -72,4 +71,3 @@ class ChatTestCase(TestCase):
             response = self.client.post(self.chat_url,
                                         {"chat": self.chat, "sender": self.admin, "message": "test message"})
             self.assertEqual(response.status_code, 302)
-

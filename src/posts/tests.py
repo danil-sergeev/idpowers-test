@@ -25,18 +25,15 @@ class PostDetailViewTestCase(TestCase):
             summary='Test summary',
             content='Test content'
         )
-        print(self.post)
         self.detail_url = reverse_lazy('posts:detail-post', args={self.post.pk})
 
     def test_detail_template(self):
         response = self.client.get(self.detail_url)
-        print(response)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, template_name='post_detail.html')
 
     def test_detail_template_fields(self):
         response = self.client.get(self.detail_url)
-        print(response)
         self.assertContains(response, self.post.title)
         self.assertContains(response, self.post.content)
 
@@ -53,7 +50,7 @@ class NotAuthorPostTestCase(TestCase):
             password='12345'
         )
 
-        self.client = Client()
+        self.client = Client(enforce_csrf_checks=True)
 
         self.category = Category.objects.create(
             title='Test Category'
@@ -86,14 +83,12 @@ class NotAuthorPostTestCase(TestCase):
         if self.client.login(email=self.customer.email,
                              password=self.customer.password):
             response = self.client.post(self.delete_url)
-            print(response)
             self.assertEqual(response.status_code, 404)
 
     def test_edit_post_access(self):
         if self.client.login(email=self.customer.email,
                              password=self.customer.password):
             response = self.client.post(self.edit_url)
-            print(response)
             self.assertEqual(response.status_code, 404)
 
     def test_can_comment(self):

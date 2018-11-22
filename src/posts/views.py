@@ -1,13 +1,13 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.db.models import Prefetch
-from django.urls import reverse_lazy
-from django.views import generic, View
-from django.views.generic.edit import FormMixin
 from django.http import HttpResponseForbidden, Http404
+from django.urls import reverse_lazy
+from django.views import generic
+from django.views.generic.edit import FormMixin
 
-from posts.models import Post, Category, Comment, Mark
 from posts.forms import PostForm, CommentForm, MarkForm
+from posts.models import Post, Category, Mark, Comment
 
 
 # Create your views here.
@@ -17,7 +17,8 @@ class AllPostsListView(generic.ListView):
 
     def get_queryset(self):
         queryset = Post.objects.all().prefetch_related(
-            Prefetch('author')
+            Prefetch('author'),
+            Prefetch('category')
         )
 
         keywords = self.request.GET.get('q')
@@ -98,9 +99,14 @@ class PostDetailView(FormMixin, generic.DetailView):
     form_class = CommentForm
     second_form_class = MarkForm
 
+    def get_success_url(self):
+        return reverse_lazy("posts:detail-post", args={self.get_object().pk})
+
     def get_queryset(self):
+        marks_queryset = Mark.objects.filter(sender=self.request.user)
         queryset = Post.objects.prefetch_related(
-            Prefetch('comments')
+            Prefetch('comments'),
+            Prefetch('marks', queryset=marks_queryset)
         )
         return queryset
 
@@ -108,20 +114,20 @@ class PostDetailView(FormMixin, generic.DetailView):
         context = super(PostDetailView, self).get_context_data()
         context['obj'] = self.get_object(self.get_queryset())
         if self.request.user.is_authenticated:
-            context['form'] = self.get_form()
-            context['mark_form'] = self.get_form(self.second_form_class)
+            context['form'] = CommentForm(initial={"sender": self.request.user, "post": self.get_object()})
+            context['mark_form'] = MarkForm(initial={"sender": self.request.user, "post": self.get_object()})
         return context
 
     def post(self, request, *args, **kwargs):
         posting = self.get_object()
-
+        print(request.POST)
         if request.user == posting.author:
             return HttpResponseForbidden()
 
         if 'form1' in request.POST:
-            form = self.get_form()
+            form = self.form_class(request.POST)
         else:
-            form = self.get_form(self.second_form_class)
+            form = self.second_form_class(request.POST)
 
         if form.is_valid():
             return self.form_valid(form)
@@ -129,18 +135,9 @@ class PostDetailView(FormMixin, generic.DetailView):
             return self.form_invalid(form)
 
     def form_valid(self, form):
-        posting = self.get_object()
-        sender = self.request.user
-        if form == self.form_class:
-            content = form.cleaned_data.get("content")
-            Comment.objects.create(post=posting, sender=sender, content=content)
-        else:
-            selected_mark = form.cleaned_data.get("mark")
-            Mark.objects.create(post=posting, sender=sender, mark=selected_mark)
+        print(form)
+        form.save()
         return super(PostDetailView, self).form_valid(form)
-
-    def get_success_url(self):
-        return reverse_lazy("posts:detail-post", args={self.get_object().pk})
 
 
 class PostCreateView(LoginRequiredMixin, generic.CreateView):

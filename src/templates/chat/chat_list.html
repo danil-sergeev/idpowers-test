@@ -2,8 +2,12 @@
 
 {% block content %}
     <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-        <header>Мои запросы администратору</header>
-        <a href="{% url 'tickets:create-ticket' %}">Написать запрос</a>
+        {% if request.user.is_superuser %}
+            <h2>Запросы пользователей</h2>
+        {% else %}
+            <h2>Мои запросы администратору</h2>
+            <a href="{% url 'tickets:create-ticket' %}">Написать запрос</a>
+        {% endif %}
     </div>
     {% for obj in object_list %}
         <div style="display: flex; flex-direction: row; justify-content: space-around; align-items: center">

@@ -27,7 +27,7 @@ SECRET_KEY = '2qkg8^*x!5qc5=py(o)i+cu9!0va!xb$y0rowv%(ijamb$zr&)'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -85,22 +85,26 @@ ASGI_APPLICATION = 'blog.routing.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'django_db',
-        'USER': 'user_name',
-        'PASSWORD': 'password',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'NAME': 'postgres',
+        'USER': 'blog',
+        'PASSWORD': '12345',
+        'HOST': 'db',
+        'PORT': 5432,
         'TEST': {
-            'NAME': 'test_django_db',
+            'NAME': 'postgres_test',
         },
     }
 }
+
+REDIS_PORT = 6379
+REDIS_DB = 0
+REDIS_HOST = os.environ.get('REDIS_PORT_6379_TCP_ADDR', 'redis')
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("localhost", 6379)],
+            "hosts": [(REDIS_HOST, REDIS_PORT)],
             # "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')]
         },
     },

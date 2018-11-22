@@ -66,7 +66,6 @@ class Mark(models.Model):
     mark = models.IntegerField(choices=MARK_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
 
-
     @property
     def post_pk(self):
         return self.post.pk

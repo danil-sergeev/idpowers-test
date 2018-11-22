@@ -12,10 +12,12 @@ class PostForm(forms.ModelForm):
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
-        exclude = ('sender', 'post', 'created_at')
+        fields = ('sender', 'post', 'content')
+        widgets = {"sender": forms.HiddenInput(), "post": forms.HiddenInput()}
 
 
 class MarkForm(forms.ModelForm):
     class Meta:
         model = Mark
-        exclude = ('sender', 'post', 'created_at')
+        fields = ('sender', 'post', 'mark')
+        widgets = {"sender": forms.HiddenInput(), "post": forms.HiddenInput()}

@@ -20,8 +20,8 @@
           style="display: flex; flex-direction: row; align-items: center">
         <select size="3" multiple name="sort">
             <option disabled>Выберите сортировку</option>
-            <option selected value="-created_at">В порядке возрастания</option>
-            <option value="created_at">В порядке убывания</option>
+            <option selected value="created_at">В порядке возрастания</option>
+            <option value="-created_at">В порядке убывания</option>
             <option value="author">По автору</option>
         </select>
         &nbsp;
@@ -29,7 +29,6 @@
             <i>Сортировать</i>
         </button>
     </form>
-
     {% for obj in object_list %}
         <div style="display: flex; flex-flow: column wrap; justify-content: space-between; align-items: center">
             <h3>
@@ -37,6 +36,11 @@
                     {{ obj.title }}
                 </a>
             </h3>
+            <h6>
+                <a href="{% url 'posts:posts-by-category' title=obj.category.title %}">
+                    {{ obj.category.title }}
+                </a>
+            </h6>
             {% if request.user.email != obj.author.email %}
                 <h4>
                     <small>by</small>

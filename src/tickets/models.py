@@ -1,9 +1,9 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
 
 
 class Chat(models.Model):
-    admin = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='admin_in_chat')
+    admin = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, related_name='admin_in_chat')
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='customer_in_chat')
     updated = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)

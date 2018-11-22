@@ -2,7 +2,7 @@ from django.http import HttpResponseForbidden
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.views.generic.edit import FormMixin
-from django.views.generic import DetailView, ListView, CreateView, FormView
+from django.views.generic import DetailView, ListView, CreateView
 from django.db.models import Prefetch, Q
 
 from tickets.models import Chat, ChatMessage
@@ -17,7 +17,7 @@ class MyTicketsListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Chat.objects.filter(
-            Q(customer=self.request.user) | Q(admin=self.request.suer)
+            Q(customer=self.request.user) | Q(admin=self.request.user)
         )
 
     def get_context_data(self, *, object_list=None, **kwargs):
