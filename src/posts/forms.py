@@ -1,6 +1,6 @@
 from django import forms
 
-from posts.models import Post, Comment
+from posts.models import Post, Comment, Mark
 
 
 class PostForm(forms.ModelForm):
@@ -15,6 +15,7 @@ class CommentForm(forms.ModelForm):
         exclude = ('sender', 'post', 'created_at')
 
 
-class MarkForm(forms.Form):
-    CHOICES = tuple([(i + 1, i + 1) for i in range(5)])
-    select = forms.ChoiceField(widget=forms.Select(choices=CHOICES))
+class MarkForm(forms.ModelForm):
+    class Meta:
+        model = Mark
+        exclude = ('sender', 'post', 'created_at')

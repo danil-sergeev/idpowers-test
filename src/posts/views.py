@@ -4,7 +4,7 @@ from django.db.models import Prefetch
 from django.urls import reverse_lazy
 from django.views import generic, View
 from django.views.generic.edit import FormMixin
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, Http404
 
 from posts.models import Post, Category, Comment, Mark
 from posts.forms import PostForm, CommentForm, MarkForm
@@ -109,7 +109,7 @@ class PostDetailView(FormMixin, generic.DetailView):
         context['obj'] = self.get_object(self.get_queryset())
         if self.request.user.is_authenticated:
             context['form'] = self.get_form()
-            context['mark_form'] = self.mark_form
+            context['mark_form'] = self.get_form(self.second_form_class)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -135,7 +135,7 @@ class PostDetailView(FormMixin, generic.DetailView):
             content = form.cleaned_data.get("content")
             Comment.objects.create(post=posting, sender=sender, content=content)
         else:
-            selected_mark = form.cleaned_data.get("select")
+            selected_mark = form.cleaned_data.get("mark")
             Mark.objects.create(post=posting, sender=sender, mark=selected_mark)
         return super(PostDetailView, self).form_valid(form)
 
@@ -162,14 +162,28 @@ class PostCreateView(LoginRequiredMixin, generic.CreateView):
 class PostUpdateView(LoginRequiredMixin, generic.CreateView):
     model = Post
     fields = ['title', 'summary', 'content']
-    success_url = reverse_lazy('posts:my-posts')
     template_name = 'form.html'
+
+    def get_success_url(self):
+        return reverse_lazy('posts:post-detail', args={self.object.pk})
+
+    def get_object(self, queryset=None):
+        obj = super(PostUpdateView, self).get_object()
+        if not obj.author == self.request:
+            raise Http404
+        return obj
 
 
 class PostDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Post
     template_name = 'confirm_delete.html'
     success_url = reverse_lazy('posts:my-posts')
+
+    def get_object(self, queryset=None):
+        obj = super(PostDeleteView, self).get_object()
+        if not obj.author == self.request.user:
+            raise Http404
+        return obj
 
 
 class CategoryListView(generic.ListView):

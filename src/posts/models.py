@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 
+
 # Create your models here.
 
 
@@ -52,6 +53,7 @@ class Comment(models.Model):
 
 
 class Mark(models.Model):
+    MARK_CHOICES = ((1, 1), (2, 2), (3, 3), (4, 4), (5, 5))
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
@@ -61,8 +63,9 @@ class Mark(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE
     )
-    mark = models.IntegerField()
+    mark = models.IntegerField(choices=MARK_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
+
 
     @property
     def post_pk(self):
@@ -70,9 +73,3 @@ class Mark(models.Model):
 
     def __str__(self):
         return f'{self.mark} -- {self.post.title}'
-
-
-
-
-
-
