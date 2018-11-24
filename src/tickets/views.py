@@ -1,5 +1,6 @@
 from django.http import HttpResponseForbidden
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
 from django.views.generic.edit import FormMixin
 from django.views.generic import DetailView, ListView, CreateView
@@ -10,6 +11,8 @@ from tickets.forms import ChatForm, ChatCreateForm
 
 
 # Create your views here.
+
+profile = get_user_model()
 
 
 class MyTicketsListView(LoginRequiredMixin, ListView):
@@ -37,8 +40,12 @@ class CreateChatWithAdmin(LoginRequiredMixin, CreateView):
         context['form'] = self.form_class()
         return context
 
+    # чет закостылил тут. не сейвилась форма как - то
     def form_valid(self, form):
+        admin_pk = self.request.POST.get("admin")
+        admin = profile.objects.get(pk=admin_pk)
         form.instance.customer = self.request.user
+        form.instance.admin = admin
         return super(CreateChatWithAdmin, self).form_valid(form)
 
 
